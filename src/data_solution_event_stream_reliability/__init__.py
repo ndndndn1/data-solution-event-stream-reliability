@@ -1,3 +1,21 @@
-from .pipeline import PipelineResult, ReliablePipeline
+from .pipeline import PipelineMetrics, PipelineResult, ReliablePipeline
+from .simulator import (
+    EventGenerationConfig,
+    EventStreamGenerator,
+    FailurePlan,
+    FaultInjectingProcessor,
+    GeneratedEventStream,
+    GenerationSummary,
+)
 
-__all__ = ["PipelineResult", "ReliablePipeline"]
+__all__ = [
+    "EventGenerationConfig",
+    "EventStreamGenerator",
+    "FailurePlan",
+    "FaultInjectingProcessor",
+    "GeneratedEventStream",
+    "GenerationSummary",
+    "PipelineMetrics",
+    "PipelineResult",
+    "ReliablePipeline",
+]

@@ -9,5 +9,8 @@ description = "대량 이벤트의 중복·지연·실패를 다루고 재처리
 requires-python = ">=3.12"
 license = {text = "MIT"}
 
+[project.scripts]
+event-stream-scenario = "data_solution_event_stream_reliability.scenario:main"
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/data_solution_event_stream_reliability"]
