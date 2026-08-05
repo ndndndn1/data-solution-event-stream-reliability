@@ -1,0 +1,13 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "data-solution-event-stream-reliability"
+version = "0.1.0"
+description = "대량 이벤트의 중복·지연·실패를 다루고 재처리 가능성을 검증합니다."
+requires-python = ">=3.12"
+license = {text = "MIT"}
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/data_solution_event_stream_reliability"]
