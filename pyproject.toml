@@ -11,6 +11,7 @@ license = {text = "MIT"}
 
 [project.scripts]
 event-stream-scenario = "data_solution_event_stream_reliability.scenario:main"
+event-stream-benchmark = "data_solution_event_stream_reliability.benchmark:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/data_solution_event_stream_reliability"]

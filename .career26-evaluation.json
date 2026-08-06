@@ -36,6 +36,13 @@
       "symbols": ["run_scenario"],
       "test_path": "tests/test_scenario.py",
       "weight": 3
+    },
+    {
+      "id": "representative-benchmark",
+      "name": "repeatable representative benchmark",
+      "symbols": ["run_benchmark"],
+      "test_path": "tests/test_benchmark.py",
+      "weight": 2
     }
   ],
   "mutation_score": null,

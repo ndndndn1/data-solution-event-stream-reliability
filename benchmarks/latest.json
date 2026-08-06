@@ -1,0 +1,35 @@
+{
+  "correctness_passed": true,
+  "cpu_seconds": {
+    "max": 6.0,
+    "mean": 5.484375
+  },
+  "delivered_records_per_run": 105000,
+  "environment": {
+    "machine": "AMD64",
+    "python": "3.13.1",
+    "system": "Windows"
+  },
+  "error_rate": 0.0,
+  "events_per_run": 100000,
+  "failure_recovery_passed": true,
+  "generated_at": "2026-08-06T10:36:28.273555+00:00",
+  "measured_runs": 10,
+  "peak_memory_bytes": {
+    "max": 74526332,
+    "mean": 74522812
+  },
+  "representative_workload": true,
+  "run_latency_ms": {
+    "p50": 5865.268,
+    "p95": 6195.091,
+    "p99": 6208.055
+  },
+  "schema_version": 1,
+  "storage_bytes": 0,
+  "throughput_records_per_second": {
+    "mean": 18762.78,
+    "min": 16904.68
+  },
+  "warmup_runs": 1
+}

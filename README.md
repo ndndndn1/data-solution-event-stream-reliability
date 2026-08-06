@@ -75,6 +75,17 @@ python -m pip install -e .
 python -m unittest discover -s tests -v
 ```
 
+## 반복 성능 측정
+
+대표 100,000건 복합 장애 부하를 1회 warmup 뒤 10회 실행해 처리량, 실행 지연
+p50/p95/p99, 오류율, CPU 시간, peak memory와 복구 정확성을 기록합니다.
+
+```bash
+event-stream-benchmark --output benchmarks/latest.json
+```
+
+측정 결과는 실행 환경과 함께 `benchmarks/latest.json`에 저장합니다.
+
 ## 대량 이벤트 복합 장애 시나리오
 
 광고 노출 이벤트가 한꺼번에 유입되는 동안 중복 전송, 늦은 도착, 잘못된
