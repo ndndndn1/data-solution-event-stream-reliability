@@ -3,14 +3,14 @@
 <!-- engineering-completeness:start -->
 ## Engineering completeness
 
-- Score: **81.85/100** (44.20/54)
-- Technical maturity: **PORTFOLIO_READY**
+- Score: **96.67/100** (52.20/54)
+- Technical maturity: **VERIFIED_COMPLETE**
 - Reachable stub ratio: **0.00%**
 - Requirement-weighted stub ratio: **0.00%**
 - Critical feature stub: **absent**
-- Verified feature scope: composite failure and recovery scenario, deterministic synthetic event stream, idempotent deduplication, retry, DLQ, and replay recovery
+- Verified feature scope: composite failure and recovery scenario, deterministic synthetic event stream, idempotent deduplication, repeatable representative benchmark, retry, DLQ, and replay recovery
 - Reproducible clean run: **yes**
-- Rubric: `1.0.0` · Commit: `6446d89a3460`
+- Rubric: `1.0.0` · Commit: `f4bfd3770df9`
 <!-- engineering-completeness:end -->
 
 광고·이벤트 데이터 파이프라인에서 대량 이벤트의 중복·지연·실패를 다루고,
