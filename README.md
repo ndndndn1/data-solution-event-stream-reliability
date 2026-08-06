@@ -1,5 +1,18 @@
 # data-solution-event-stream-reliability
 
+<!-- engineering-completeness:start -->
+## Engineering completeness
+
+- Score: **81.85/100** (44.20/54)
+- Technical maturity: **PORTFOLIO_READY**
+- Reachable stub ratio: **0.00%**
+- Requirement-weighted stub ratio: **0.00%**
+- Critical feature stub: **absent**
+- Verified feature scope: composite failure and recovery scenario, deterministic synthetic event stream, idempotent deduplication, retry, DLQ, and replay recovery
+- Reproducible clean run: **yes**
+- Rubric: `1.0.0` · Commit: `6446d8979f69`
+<!-- engineering-completeness:end -->
+
 광고·이벤트 데이터 파이프라인에서 대량 이벤트의 중복·지연·실패를 다루고,
 장애 이후 안전하게 재처리할 수 있는지를 보여 주는 실행 가능한 Python
 프로토타입입니다.
