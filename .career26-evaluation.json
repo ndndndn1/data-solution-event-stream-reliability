@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "repository_name": "data-solution-event-stream-reliability",
+  "archetype": "data-pipeline",
+  "test_command": ["python", "-m", "unittest", "discover", "-s", "tests", "-v"],
+  "critical_symbols": [
+    "ReliablePipeline.process",
+    "ReliablePipeline.replay",
+    "run_scenario"
+  ],
+  "features": [
+    {
+      "id": "deduplication",
+      "name": "idempotent deduplication",
+      "symbols": ["ReliablePipeline.process"],
+      "test_path": "tests/test_pipeline.py",
+      "weight": 3
+    },
+    {
+      "id": "retry-dlq-replay",
+      "name": "retry, DLQ, and replay recovery",
+      "symbols": ["ReliablePipeline.process", "ReliablePipeline.replay"],
+      "test_path": "tests/test_pipeline.py",
+      "weight": 3
+    },
+    {
+      "id": "synthetic-event-stream",
+      "name": "deterministic synthetic event stream",
+      "symbols": ["EventStreamGenerator.generate"],
+      "test_path": "tests/test_simulator.py",
+      "weight": 2
+    },
+    {
+      "id": "composite-failure-scenario",
+      "name": "composite failure and recovery scenario",
+      "symbols": ["run_scenario"],
+      "test_path": "tests/test_scenario.py",
+      "weight": 3
+    }
+  ],
+  "mutation_score": null,
+  "integration_test_paths": ["tests/test_scenario.py"],
+  "benchmark_path": "benchmarks/latest.json",
+  "operations": {
+    "health_lifecycle_and_config": {
+      "symbols": ["ScenarioConfig.__post_init__"],
+      "test_path": "tests/test_scenario.py"
+    },
+    "checkpoint_replay_idempotency": {
+      "symbols": ["ReliablePipeline.replay"],
+      "test_path": "tests/test_pipeline.py"
+    },
+    "data_quality_observability": {
+      "symbols": ["ReliablePipeline.process"],
+      "test_path": "tests/test_pipeline.py"
+    },
+    "dlq_recovery": {
+      "symbols": ["ReliablePipeline.replay"],
+      "test_path": "tests/test_scenario.py"
+    }
+  }
+}
