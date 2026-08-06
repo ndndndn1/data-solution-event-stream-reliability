@@ -10,7 +10,7 @@
 - Critical feature stub: **absent**
 - Verified feature scope: composite failure and recovery scenario, deterministic synthetic event stream, idempotent deduplication, retry, DLQ, and replay recovery
 - Reproducible clean run: **yes**
-- Rubric: `1.0.0` · Commit: `6446d8979f69`
+- Rubric: `1.0.0` · Commit: `6446d89a3460`
 <!-- engineering-completeness:end -->
 
 광고·이벤트 데이터 파이프라인에서 대량 이벤트의 중복·지연·실패를 다루고,
