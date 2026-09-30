@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Iterable, Mapping
+from copy import deepcopy
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from typing import Any
@@ -73,10 +74,10 @@ class ReliablePipeline:
         if max_lateness is not None and max_lateness < timedelta(0):
             raise ValueError("max_lateness must be zero or greater")
 
-        self._processor = processor or (lambda _record: None)
+        self._processor = processor if processor is not None else (lambda _record: None)
         self._max_retries = max_retries
         self._max_lateness = max_lateness
-        self._clock = clock or (lambda: datetime.now(timezone.utc))
+        self._clock = clock if clock is not None else (lambda: datetime.now(timezone.utc))
         self._processed_ids: set[str] = set()
         self._metrics = PipelineMetrics()
 
@@ -87,7 +88,12 @@ class ReliablePipeline:
         return self._metrics
 
     def process(self, records: Iterable[Record]) -> PipelineResult:
-        """Validate and deliver records, retrying transient processor errors."""
+        """Validate and deliver records, retrying transient processor errors.
+
+        Records must support deepcopy (JSON-like payloads are recommended).
+        Non-copyable objects raise rather than silently sharing mutable state.
+        Each processor attempt receives an independent snapshot.
+        """
 
         return self._process(records, replayed=False)
 
@@ -145,7 +151,7 @@ class ReliablePipeline:
             while True:
                 attempts += 1
                 try:
-                    self._processor(dict(record))
+                    self._processor(deepcopy(record))
                 except Exception as error:
                     if attempts <= self._max_retries:
                         counters["retry_attempts"] += 1
@@ -153,7 +159,7 @@ class ReliablePipeline:
                     counters["processing_failures"] += 1
                     dead_letter.append(
                         {
-                            "record": dict(record),
+                            "record": deepcopy(record),
                             "reason": "PROCESSING_FAILED",
                             "error": f"{type(error).__name__}: {error}",
                             "attempts": attempts,
@@ -162,7 +168,7 @@ class ReliablePipeline:
                     break
                 else:
                     self._processed_ids.add(record_id)
-                    accepted.append(dict(record))
+                    accepted.append(deepcopy(record))
                     break
 
         run_metrics = PipelineMetrics(
@@ -190,7 +196,7 @@ class ReliablePipeline:
         if not isinstance(raw_record, Mapping):
             return None, "record must be a mapping"
 
-        record = dict(raw_record)
+        record = deepcopy(dict(raw_record))
         record_id = record.get("id")
         if not isinstance(record_id, str) or not record_id.strip():
             return None, "id must be a non-empty string"
@@ -230,4 +236,4 @@ class ReliablePipeline:
 
     @staticmethod
     def _snapshot(record: Any) -> Any:
-        return dict(record) if isinstance(record, Mapping) else record
+        return deepcopy(dict(record) if isinstance(record, Mapping) else record)

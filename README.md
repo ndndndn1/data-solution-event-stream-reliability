@@ -63,6 +63,11 @@ assert replayed.metrics.recovered == 1
 }
 ```
 
+레코드와 nested payload는 `copy.deepcopy` 가능한 값이어야 합니다(JSON형 데이터 권장).
+안전한 독립 snapshot을 만들 수 없는 객체는 처리 중 예외가 발생할 수 있습니다.
+callback은 각 시도마다 별도 복사본을 받고, caller 입력과 accepted/DLQ 원본은
+callback의 변경으로부터 분리됩니다.
+
 `max_retries=2`는 최초 시도 뒤 최대 두 번 더 시도한다는 뜻입니다.
 `max_lateness=None`으로 지연 판정을 끌 수 있습니다. 기본 허용 지연은 5분입니다.
 
@@ -156,11 +161,19 @@ print(stream.failure_plan)
 이 시나리오는 기능적 정합성 검증이며 실행 시간이나 초당 처리량을 운영
 벤치마크 결과로 간주하지 않습니다.
 
+## 초기 목적 기반 검증
+
+[목적별 검증 가이드](docs/purpose-acceptance.md)는 실제 SQLite sink/디스크 DLQ,
+commit 후 응답 손실, callback의 nested payload 변형까지 검증합니다.
+`python examples/reliability_sqlite_demo.py`로 재현할 수 있습니다.
+기본 callback은 시뮬레이션용 no-op이며 외부 저장의 exactly-once 증거가 아닙니다.
+
 ## 범위와 확장 방향
 
 이 저장소는 공고의 신뢰성 문제를 코드로 설명하기 위한 단일 프로세스
 프로토타입이며 처리량 벤치마크나 운영 완료를 주장하지 않습니다. 현재 중복
-상태와 지표는 메모리에 있고 재시도에는 실제 대기 시간이 없습니다. 운영 환경에서는
+상태와 지표는 기존 ReliablePipeline 경로에서는 메모리에 있고 재시도에는 실제
+대기 시간이 없습니다. 새 TelemetryStore 경로는 별도 SQLite 영속 저장입니다. 운영 환경에서는
 각 경계를 다음과 같이 교체할 수 있습니다.
 
 - 입력/재처리: Kafka 같은 영속 이벤트 로그와 consumer offset
