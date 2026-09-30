@@ -14,6 +14,18 @@ from data_solution_event_stream_reliability import (
 
 
 class EventStreamGeneratorTests(unittest.TestCase):
+    def test_false_valued_downstream_is_called(self):
+        class Sink(list):
+            def __call__(self, record):
+                self.append(record)
+
+        sink = Sink()
+        processor = FaultInjectingProcessor(FailurePlan(frozenset(), frozenset()), downstream=sink)
+        processor({"id": "a", "payload": {}})
+        self.assertEqual(len(sink), 1)
+        self.assertEqual(processor.successful_deliveries, {"a": 1})
+
+
     def test_generates_expected_reiterable_volume_and_categories(self):
         stream = EventStreamGenerator(EventGenerationConfig(event_count=1_000)).generate()
 

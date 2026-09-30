@@ -101,6 +101,67 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(result.metrics.validation_failures, 1)
         self.assertIn("ISO 8601", result.dead_letter[0]["error"])
 
+    def test_nested_payload_isolated_for_each_retry_and_dlq(self):
+        original = {"id": "nested", "payload": {"values": [1, 2, 3]}}
+        seen = []
+
+        def mutating_failure(record):
+            seen.append(list(record["payload"]["values"]))
+            record["payload"]["values"].pop()
+            raise TimeoutError("failed after modifying working copy")
+
+        result = ReliablePipeline(mutating_failure, max_retries=2).process([original])
+        self.assertEqual(seen, [[1, 2, 3]] * 3)
+        self.assertEqual(original["payload"]["values"], [1, 2, 3])
+        original["payload"]["values"].append(99)
+        self.assertEqual(result.dead_letter[0]["record"]["payload"]["values"], [1, 2, 3])
+        replayed = ReliablePipeline().replay(result.dead_letter)
+        self.assertEqual(replayed.accepted[0]["payload"]["values"], [1, 2, 3])
+
+    def test_invalid_input_dlq_is_a_nested_snapshot(self):
+        original = {"payload": {"value": 1}}
+        result = ReliablePipeline().process([original])
+        original["payload"]["value"] = 999
+        self.assertEqual(result.dead_letter[0]["record"]["payload"]["value"], 1)
+
+    def test_success_result_and_caller_isolated_from_processor(self):
+        original = {"id": "ok", "payload": {"values": [1]}}
+        captured = []
+
+        def mutate(record):
+            record["payload"]["values"].append(2)
+            captured.append(record)
+
+        result = ReliablePipeline(mutate).process([original])
+        captured[0]["payload"]["values"].append(3)
+        self.assertEqual(original["payload"]["values"], [1])
+        self.assertEqual(result.accepted[0]["payload"]["values"], [1])
+        original["payload"]["values"].append(4)
+        self.assertEqual(result.accepted[0]["payload"]["values"], [1])
+
+    def test_false_valued_callable_is_not_replaced_by_noop(self):
+        class Sink(list):
+            def __call__(self, record):
+                self.append(record)
+
+        sink = Sink()
+        result = ReliablePipeline(sink).process([{"id": "a", "payload": {}}])
+        self.assertEqual(result.metrics.accepted, 1)
+        self.assertEqual(len(sink), 1)
+
+    def test_false_valued_clock_is_used(self):
+        class Clock:
+            def __bool__(self):
+                return False
+
+            def __call__(self):
+                return datetime(2026, 1, 1, tzinfo=timezone.utc)
+
+        result = ReliablePipeline(clock=Clock()).process([
+            {"id": "a", "payload": {}, "event_time": "2026-01-01T00:00:00Z"}
+        ])
+        self.assertEqual(result.metrics.late_records, 0)
+
     def test_configuration_must_be_non_negative(self):
         with self.assertRaises(ValueError):
             ReliablePipeline(max_retries=-1)

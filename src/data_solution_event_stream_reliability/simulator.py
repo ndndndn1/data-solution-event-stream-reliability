@@ -194,7 +194,7 @@ class FaultInjectingProcessor:
         downstream: Callable[[dict[str, Any]], None] | None = None,
     ) -> None:
         self.failure_plan = failure_plan
-        self._downstream = downstream or (lambda _record: None)
+        self._downstream = downstream if downstream is not None else (lambda _record: None)
         self._outage_active = True
         self._attempts: Counter[str] = Counter()
         self._successful_deliveries: Counter[str] = Counter()
