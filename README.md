@@ -28,7 +28,7 @@
 | 잘못된 데이터 격리 | `id`, `payload`, 선택적 `event_time`을 검증하고, 실패한 원본과 사유를 DLQ 항목으로 보존합니다. | `validation_failures` |
 | 일시적 장애에 대한 복원력 | downstream 쓰기를 `processor`로 분리하고, 예외 발생 시 설정된 횟수만큼 즉시 재시도합니다. 모두 실패하면 시도 횟수와 마지막 오류를 DLQ로 보냅니다. | `retry_attempts`, `processing_failures` |
 | 지연 도착 이벤트 관측 | timezone이 포함된 event time과 현재 시각을 비교합니다. 허용 지연을 넘겨도 데이터 손실 없이 처리하되 별도 집계합니다. | `late_records` |
-| 장애 데이터 재처리와 복구 확인 | 이전 실행의 DLQ를 `replay()`에 그대로 전달할 수 있습니다. 실패 전에 성공 처리된 이벤트는 중복 방지 상태에 포함되지 않으므로 복구 후 다시 처리됩니다. | `replayed`, `recovered` |
+| 장애 데이터 재처리와 복구 확인 | 이전 실행의 DLQ를 `replay()`에 그대로 전달할 수 있습니다. 성공 처리된 이벤트는 중복 방지 상태에 남고, 처리에 실패한 이벤트는 포함되지 않으므로 복구 후 다시 시도할 수 있습니다. | `replayed`, `recovered` |
 | 운영 가시성 | 각 실행의 `PipelineResult.metrics`와 인스턴스 누적 `pipeline.metrics`를 함께 제공합니다. | `received`, `accepted` 및 위 지표 |
 
 ## 동작 예시
@@ -66,12 +66,21 @@ assert replayed.metrics.recovered == 1
 `max_retries=2`는 최초 시도 뒤 최대 두 번 더 시도한다는 뜻입니다.
 `max_lateness=None`으로 지연 판정을 끌 수 있습니다. 기본 허용 지연은 5분입니다.
 
+## 공장 텔레메트리 영속 API (추가)
+
+FastAPI + SQLite 기반의 별도 수집/조회 경로를 추가했습니다. 재시작 후 중복 방지,
+충돌 시 409/원자적 rollback, 공장·장비 시계열 조회를 검증합니다.
+설치, 실제 HTTP 재시작 데모, API 계약과 제한은 [실행 가이드](docs/telemetry-api.md)를 보세요.
+위 Engineering completeness 수치는 기존 시뮬레이터 범위의 과거 평가이며
+추가 API 또는 운영 준비도를 인증하지 않습니다.
+
 ## 실행
 
-Python 3.12 이상에서 외부 런타임 의존성 없이 실행됩니다.
+기존 시뮬레이터는 Python 3.12 이상에서 외부 런타임 의존성 없이 실행됩니다.
+전체 테스트(API 포함)는 아래 선택 의존성 설치가 필요합니다.
 
 ```bash
-python -m pip install -e .
+python -m pip install -e '.[api,test]'
 python -m unittest discover -s tests -v
 ```
 
@@ -85,6 +94,10 @@ event-stream-benchmark --output benchmarks/latest.json
 ```
 
 측정 결과는 실행 환경과 함께 `benchmarks/latest.json`에 저장합니다.
+이 기존 벤치마크의 p95/p99는 100,000건 시나리오 전체 실행 시간이며 HTTP 요청
+지연이 아닙니다. error_rate는 시나리오 검증 실패 실행 비율이며 이벤트 오류율이
+아닙니다. storage_bytes는 기존 메모리 시뮬레이터의 고정 0으로, 새 SQLite DB의
+저장 공간 측정 결과가 아닙니다.
 
 ## 대량 이벤트 복합 장애 시나리오
 

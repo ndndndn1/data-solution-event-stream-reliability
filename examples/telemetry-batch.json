@@ -1,0 +1,4 @@
+[
+  {"factory_id":"factory-demo","equipment_id":"pump-01","event_id":"sample-new","observed_at":"2026-09-30T10:00:00+09:00","metric":"temperature","value":30,"unit":"degC"},
+  {"factory_id":"factory-demo","equipment_id":"pump-01","event_id":"sample-late","observed_at":"2026-09-29T01:00:00Z","metric":"temperature","value":20,"unit":"degC"}
+]
